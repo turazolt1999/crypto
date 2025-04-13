@@ -1,5 +1,7 @@
 package com.example.crypto.pages
 
+import android.annotation.SuppressLint
+import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,11 +11,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -24,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,6 +37,7 @@ import androidx.navigation.NavController
 import com.example.crypto.AuthState
 import com.example.crypto.AuthViewModel
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun LoginPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
 
@@ -40,6 +47,14 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController, authV
 
     var password by remember {
         mutableStateOf("")
+    }
+
+    val isEmailValid by derivedStateOf {
+        Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    val showEmailError by derivedStateOf {
+        email.isNotEmpty() && !isEmailValid
     }
 
     val authState = authViewModel.authState.observeAsState()
@@ -68,20 +83,29 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController, authV
 
         OutlinedTextField(
             value = email,
-            onValueChange = {
-                email = it
-            },
-            label = {
-                Text(text = "Email")
-            },
+            onValueChange = { email = it },
+            label = { Text(text = "Email") },
             singleLine = true,
+            isError = showEmailError,
+            supportingText = {
+                if (showEmailError) {
+                    Text(
+                        text = "Invalid email format",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                errorBorderColor = MaterialTheme.colorScheme.error,
+                errorLabelColor = MaterialTheme.colorScheme.error,
+                errorSupportingTextColor = MaterialTheme.colorScheme.error
+            ),
             keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions(
-                onDone = {
-                    keyboardController?.hide()
-                }
+                onDone = { keyboardController?.hide() }
             )
         )
 
