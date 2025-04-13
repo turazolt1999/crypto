@@ -12,10 +12,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.crypto.ui.theme.CryptoTheme
+import com.google.firebase.Firebase
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.analytics
 
 class MainActivity : ComponentActivity() {
+    private lateinit var analytics: FirebaseAnalytics
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        analytics = Firebase.analytics
+        val bundle = Bundle().apply {
+            putString("status", "app_started")
+        }
+        analytics.logEvent("app_launch", bundle)
+
         enableEdgeToEdge()
         setContent {
             CryptoTheme {

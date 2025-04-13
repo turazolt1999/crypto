@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "147230712172",
+    "project_id": "cryptowatcher-c62dd",
+    "storage_bucket": "cryptowatcher-c62dd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:147230712172:android:e0e9833334470ed4a11349",
+        "android_client_info": {
+          "package_name": "com.example.crypto"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTscieCbWBzHPfmKiavPK9Z3jdSAH1cu0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
