@@ -1,6 +1,5 @@
 package com.example.crypto.pages
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,20 +11,16 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.size.Size
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import com.example.crypto.AuthState
 import com.example.crypto.AuthViewModel
 import com.example.crypto.api.CryptoData
 import com.example.crypto.api.CryptoViewModel
-import coil.compose.AsyncImagePainter
+import com.example.crypto.components.CryptoDetailsDialog
+import com.example.crypto.components.CryptoItem
+import com.example.crypto.components.MenuItem
 
 @Composable
 fun HomePage(
@@ -34,6 +29,8 @@ fun HomePage(
     authViewModel: AuthViewModel,
     cryptoViewModel: CryptoViewModel
 ) {
+    var selectedCrypto by remember { mutableStateOf<CryptoData?>(null) }
+
     val authState = authViewModel.authState.observeAsState()
     val cryptoList = cryptoViewModel.cryptoList
     val isLoading = cryptoViewModel.isLoading.value
@@ -69,10 +66,20 @@ fun HomePage(
 
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(cryptoList) { crypto ->
-                    CryptoItem(crypto = crypto)
+                    CryptoItem(
+                        crypto = crypto,
+                        onClick = { selectedCrypto = crypto }
+                    )
                     HorizontalDivider()
                 }
             }
+        }
+
+        selectedCrypto?.let { crypto ->
+            CryptoDetailsDialog(
+                crypto = crypto,
+                onDismiss = { selectedCrypto = null }
+            )
         }
 
         FloatingActionButton(
@@ -117,86 +124,6 @@ fun HomePage(
                         Text("Close")
                     }
                 }
-            )
-        }
-    }
-}
-
-@Composable
-fun MenuItem(
-    icon: ImageVector,
-    text: String,
-    selected: Boolean = false,
-    onClick: () -> Unit
-) {
-    TextButton(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.textButtonColors(
-            contentColor = if (selected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.onSurface
-        )
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null)
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(text)
-        }
-    }
-}
-
-@Composable
-fun CryptoItem(crypto: CryptoData) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val painter = rememberAsyncImagePainter(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(crypto.image)
-                .size(Size.ORIGINAL)
-                .build()
-        )
-
-        when (painter.state) {
-            is AsyncImagePainter.State.Loading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(40.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-            is AsyncImagePainter.State.Error -> {
-                Icon(
-                    imageVector = Icons.Default.Warning,
-                    contentDescription = "Hiba a képbetöltéskor",
-                    modifier = Modifier.size(40.dp),
-                    tint = MaterialTheme.colorScheme.error
-                )
-            }
-            else -> {
-                Image(
-                    painter = painter,
-                    contentDescription = "${crypto.name} logo",
-                    modifier = Modifier.size(40.dp)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = crypto.name, fontWeight = FontWeight.Bold)
-            Text(text = crypto.symbol.uppercase(), color = Color.Gray)
-        }
-
-        Column(horizontalAlignment = Alignment.End) {
-            Text(text = "$${"%.2f".format(crypto.current_price)}")
-            Text(
-                text = "${"%.2f".format(crypto.price_change_percentage_24h)}%",
-                color = if (crypto.price_change_percentage_24h >= 0) Color.Green else Color.Red
             )
         }
     }
