@@ -1,5 +1,6 @@
 package com.example.crypto.pages
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,15 +13,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
+import coil.size.Size
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.crypto.AuthState
 import com.example.crypto.AuthViewModel
 import com.example.crypto.api.CryptoData
 import com.example.crypto.api.CryptoViewModel
+import coil.compose.AsyncImagePainter
 
 @Composable
 fun HomePage(
@@ -148,11 +153,37 @@ fun CryptoItem(crypto: CryptoData) {
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = crypto.image,
-            contentDescription = "${crypto.name} logo",
-            modifier = Modifier.size(40.dp)
+        val painter = rememberAsyncImagePainter(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(crypto.image)
+                .size(Size.ORIGINAL)
+                .build()
         )
+
+        when (painter.state) {
+            is AsyncImagePainter.State.Loading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(40.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            is AsyncImagePainter.State.Error -> {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = "Hiba a képbetöltéskor",
+                    modifier = Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+            else -> {
+                Image(
+                    painter = painter,
+                    contentDescription = "${crypto.name} logo",
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.width(16.dp))
 
