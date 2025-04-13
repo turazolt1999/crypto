@@ -59,7 +59,6 @@ fun CryptoDetailsDialog(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Árfolyam adatok
                 CryptoDetailRow("Jelenlegi ár", "$${"%.4f".format(crypto.current_price)}")
                 CryptoDetailRow(
                     "24 órás változás",
@@ -70,7 +69,6 @@ fun CryptoDetailsDialog(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Bezáró gomb
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth()
