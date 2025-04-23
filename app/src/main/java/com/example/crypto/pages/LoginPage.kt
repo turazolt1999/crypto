@@ -139,5 +139,14 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController, authV
         }) {
             Text(text = "Don't have an account, Sign Up")
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextButton(onClick = {
+            navController.navigate("guest")
+        }) {
+            Text(text = "Continue as Guest")
+        }
+
     }
 }

@@ -27,7 +27,8 @@ fun HomePage(
     modifier: Modifier = Modifier,
     navController: NavController,
     authViewModel: AuthViewModel,
-    cryptoViewModel: CryptoViewModel
+    cryptoViewModel: CryptoViewModel,
+    isGuest: Boolean
 ) {
     var selectedCrypto by remember { mutableStateOf<CryptoData?>(null) }
 
@@ -38,10 +39,15 @@ fun HomePage(
 
     var showMenu by remember { mutableStateOf(false) }
     var currentRoute by remember { mutableStateOf("home") }
+    var isGuest = isGuest
 
     LaunchedEffect(authState.value) {
         when(authState.value) {
-            is AuthState.Unauthenticated -> navController.navigate("login")
+            is AuthState.Unauthenticated -> {
+                if (!isGuest) {
+                    navController.navigate("login")
+                }
+            }
             else -> Unit
         }
     }
@@ -107,15 +113,33 @@ fun HomePage(
                                 showMenu = false
                             }
                         )
+
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                        MenuItem(
-                            icon = Icons.Default.AccountCircle,
-                            text = "Logout",
-                            onClick = {
-                                authViewModel.signout()
-                                showMenu = false
-                            }
-                        )
+
+                        if (isGuest) {
+                            MenuItem(
+                                icon = Icons.Default.AccountCircle,
+                                text = "Sign In",
+                                onClick = {
+                                    authViewModel.signout()
+                                    navController.navigate("login") {
+                                        popUpTo(navController.graph.startDestinationId) {
+                                            inclusive = true
+                                        }
+                                    }
+                                    showMenu = false
+                                }
+                            )
+                        } else {
+                            MenuItem(
+                                icon = Icons.Default.AccountCircle,
+                                text = "Logout",
+                                onClick = {
+                                    authViewModel.signout()
+                                    showMenu = false
+                                }
+                            )
+                        }
                     }
                 },
                 confirmButton = {},
