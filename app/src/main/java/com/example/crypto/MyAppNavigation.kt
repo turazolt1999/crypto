@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.crypto.api.CryptoViewModel
+import com.example.crypto.pages.FavoritesPage
 import com.example.crypto.pages.HomePage
 import com.example.crypto.pages.LoginPage
 import com.example.crypto.pages.SignupPage
@@ -27,5 +28,9 @@ fun MyAppNavigation(modifier: Modifier = Modifier, authViewModel: AuthViewModel,
         composable("guest") {
             HomePage(modifier, navController, authViewModel, cryptoViewModel, true)
         }
+        composable("favorites") {
+            FavoritesPage(modifier, navController, authViewModel, cryptoViewModel, false)
+        }
+
     })
 }

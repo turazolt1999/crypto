@@ -4,7 +4,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -23,7 +26,7 @@ import com.example.crypto.components.CryptoListItems
 import com.example.crypto.components.MenuItem
 
 @Composable
-fun HomePage(
+fun FavoritesPage(
     modifier: Modifier = Modifier,
     navController: NavController,
     authViewModel: AuthViewModel,
@@ -39,7 +42,7 @@ fun HomePage(
     val favorites by cryptoViewModel.favorites.collectAsState()
 
     var showMenu by remember { mutableStateOf(false) }
-    var currentRoute by remember { mutableStateOf("home") }
+    var currentRoute by remember { mutableStateOf("favorites") }
     var isGuest = remember { mutableStateOf(isGuest) }
 
     LaunchedEffect(authState.value, isGuest) {
@@ -66,7 +69,7 @@ fun HomePage(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Crypto", fontSize = 32.sp)
+            Text(text = "Favorites", fontSize = 32.sp)
 
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -77,10 +80,12 @@ fun HomePage(
             }
 
             LazyColumn(modifier = Modifier.weight(1f)) {
-                items(cryptoList) { crypto ->
+                val favoriteCryptos = cryptoList.filter { crypto -> favorites.contains(crypto.id) }
+
+                items(favoriteCryptos) { crypto ->
                     CryptoListItems(
                         crypto = crypto,
-                        isFavorite = crypto.id in favorites,
+                        isFavorite = true,
                         onFavoriteClick = {
                             if (!isGuest.value) {
                                 cryptoViewModel.toggleFavorite(crypto.id, crypto.name)
@@ -93,7 +98,6 @@ fun HomePage(
                     HorizontalDivider()
                 }
             }
-
         }
 
         selectedCrypto?.let { crypto ->
@@ -153,7 +157,6 @@ fun HomePage(
                                 selected = currentRoute == "favorites",
                                 onClick = {
                                     currentRoute = "favorites"
-                                    navController.navigate("favorites")
                                     showMenu = false
                                 }
                             )
