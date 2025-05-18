@@ -7,7 +7,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -45,13 +47,20 @@ fun FavoritesPage(
     var currentRoute by remember { mutableStateOf("favorites") }
     var isGuest = remember { mutableStateOf(isGuest) }
 
-    LaunchedEffect(authState.value, isGuest) {
+    var searchQuery by remember { mutableStateOf("") }
+    var sortOption by remember { mutableStateOf("recent") }
+    var showSortOptions by remember { mutableStateOf(false) }
+
+    LaunchedEffect(authState.value, isGuest, sortOption) {
         if (isGuest.value) {
             cryptoViewModel.clearFavorites()
         } else {
             when (authState.value) {
                 is AuthState.Authenticated -> {
-                    cryptoViewModel.loadFavorites()
+                    when (sortOption) {
+                        "name" -> cryptoViewModel.searchFavoritesByName(searchQuery)
+                        else -> cryptoViewModel.loadFavorites()
+                    }
                 }
                 is AuthState.Unauthenticated -> {
                     navController.navigate("login")
@@ -70,6 +79,23 @@ fun FavoritesPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = "Favorites", fontSize = 32.sp)
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = {
+                        searchQuery = it
+                        cryptoViewModel.searchFavoritesByName(it)
+                    },
+                    modifier = Modifier.weight(1f),
+                    label = { Text("Search favorites") },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") }
+                )
+            }
 
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))

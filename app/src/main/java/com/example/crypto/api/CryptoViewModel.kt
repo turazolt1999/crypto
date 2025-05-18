@@ -112,6 +112,32 @@ class CryptoViewModel : ViewModel() {
         }
     }
 
+    fun searchFavoritesByName(searchQuery: String) {
+        val userId = auth.currentUser?.uid ?: run {
+            _favorites.value = emptyList()
+            return
+        }
+
+        db.collection("favorites")
+            .whereEqualTo("userId", userId)
+            .addSnapshotListener { snapshots, error ->
+                if (error != null) {
+                    _error.value = "Failed to load favorites: ${error.message}"
+                    return@addSnapshotListener
+                }
+
+                val newFavorites = snapshots?.documents
+                    ?.filter { doc ->
+                        val cryptoName = doc.getString("cryptoName") ?: ""
+                        cryptoName.contains(searchQuery, ignoreCase = true)
+                    }
+                    ?.mapNotNull { it.getString("cryptoId") }
+                    ?: emptyList()
+
+                _favorites.value = newFavorites
+            }
+    }
+
     fun toggleFavorite(cryptoId: String, cryptoName: String) {
         val userId = auth.currentUser?.uid ?: return
 
