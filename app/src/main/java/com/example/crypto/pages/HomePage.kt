@@ -19,7 +19,7 @@ import com.example.crypto.AuthViewModel
 import com.example.crypto.api.CryptoData
 import com.example.crypto.api.CryptoViewModel
 import com.example.crypto.components.CryptoDetailsDialog
-import com.example.crypto.components.CryptoItem
+import com.example.crypto.components.CryptoListItems
 import com.example.crypto.components.MenuItem
 
 @Composable
@@ -36,19 +36,25 @@ fun HomePage(
     val cryptoList = cryptoViewModel.cryptoList
     val isLoading = cryptoViewModel.isLoading.value
     val error = cryptoViewModel.error.value
+    val favorites by cryptoViewModel.favorites.collectAsState()
 
     var showMenu by remember { mutableStateOf(false) }
     var currentRoute by remember { mutableStateOf("home") }
-    var isGuest = isGuest
+    var isGuest = remember { mutableStateOf(isGuest) }
 
-    LaunchedEffect(authState.value) {
-        when(authState.value) {
-            is AuthState.Unauthenticated -> {
-                if (!isGuest) {
+    LaunchedEffect(authState.value, isGuest) {
+        if (isGuest.value) {
+            cryptoViewModel.clearFavorites()
+        } else {
+            when (authState.value) {
+                is AuthState.Authenticated -> {
+                    cryptoViewModel.loadFavorites()
+                }
+                is AuthState.Unauthenticated -> {
                     navController.navigate("login")
                 }
+                else -> Unit
             }
-            else -> Unit
         }
     }
 
@@ -72,13 +78,22 @@ fun HomePage(
 
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(cryptoList) { crypto ->
-                    CryptoItem(
+                    CryptoListItems(
                         crypto = crypto,
+                        isFavorite = crypto.id in favorites,
+                        onFavoriteClick = {
+                            if (!isGuest.value) {
+                                cryptoViewModel.toggleFavorite(crypto.id, crypto.name)
+                            } else {
+                                navController.navigate("login")
+                            }
+                        },
                         onClick = { selectedCrypto = crypto }
                     )
                     HorizontalDivider()
                 }
             }
+
         }
 
         selectedCrypto?.let { crypto ->
@@ -116,12 +131,12 @@ fun HomePage(
 
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                        if (isGuest) {
+                        if (isGuest.value) {
                             MenuItem(
                                 icon = Icons.Default.AccountCircle,
                                 text = "Sign In",
                                 onClick = {
-                                    authViewModel.signout()
+                                    authViewModel.signout(cryptoViewModel)
                                     navController.navigate("login") {
                                         popUpTo(navController.graph.startDestinationId) {
                                             inclusive = true
@@ -135,7 +150,7 @@ fun HomePage(
                                 icon = Icons.Default.AccountCircle,
                                 text = "Logout",
                                 onClick = {
-                                    authViewModel.signout()
+                                    authViewModel.signout(cryptoViewModel)
                                     showMenu = false
                                 }
                             )

@@ -6,13 +6,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,8 +34,10 @@ import com.example.crypto.api.CryptoData
 
 
 @Composable
-fun CryptoItem(
+fun CryptoListItems(
     crypto: CryptoData,
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit,
     onClick: () -> Unit
 ) {
     Row(
@@ -81,6 +87,19 @@ fun CryptoItem(
         }
 
         Column(horizontalAlignment = Alignment.End) {
+            IconButton(
+                onClick = { onFavoriteClick() },
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.Favorite,
+                    contentDescription = "Favorite",
+                    tint = if (isFavorite) Color.Red else MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
             Text(text = "$${"%.2f".format(crypto.current_price)}")
             Text(
                 text = "${"%.2f".format(crypto.price_change_percentage_24h)}%",

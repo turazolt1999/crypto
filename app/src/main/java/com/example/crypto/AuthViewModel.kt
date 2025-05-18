@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.example.crypto.api.CryptoViewModel
 
 class AuthViewModel : ViewModel() {
 
@@ -60,7 +61,8 @@ class AuthViewModel : ViewModel() {
             }
     }
 
-    fun signout() {
+    fun signout(cryptoViewModel: CryptoViewModel) {
+        cryptoViewModel.setLoggingOut(false)
         auth.signOut()
         _authState.value = AuthState.Unauthenticated
     }
